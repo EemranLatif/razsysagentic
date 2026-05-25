@@ -1,0 +1,8 @@
+2026-05-20 06:50:05,639 - mcp_filesystem - INFO - 加载配置完成: 传输协议=stdio, 主机=0.0.0.0, 端口=8000
+2026-05-20 06:50:05,728 - mcp_filesystem - INFO - 启动MCP FileSystem Server，传输协议: stdio
+2026-05-20 06:51:15,380 - mcp.server.lowlevel.server - ERROR - Received exception from stream: 1 validation error for JSONRPCMessage
+  Invalid JSON: EOF while parsing a value at line 2 column 0 [type=json_invalid, input_value='\n', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/json_invalid
+2026-05-20 06:51:21,168 - mcp.server.lowlevel.server - ERROR - Received exception from stream: 1 validation error for JSONRPCMessage
+  Invalid JSON: EOF while parsing a value at line 2 column 0 [type=json_invalid, input_value='\n', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/json_invalid
