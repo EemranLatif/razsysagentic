@@ -1,0 +1,79 @@
+Website Design and Development
+You'd be surprised at how happy the right CMS can make you. Raz Systems's experience in designing, developing, and supporting Joomla, Drupal, and WordPress websites gives us the insight to recommend the best solution for you.
+
+Training & Consulting Focus
+Raz Systems provides consulting, development, and training services across Data Science, Big Data Engineering, Machine Learning, LLM Applications, and Agentic AI. Our team helps organizations build scalable AI solutions, modern data platforms, intelligent automation workflows, and AI-powered decision-support systems that turn ideas into results.
+
+Database Development
+streamlined the coordination and compliance of large volumes of data from spreadsheets, emails, and documents by building a custom database app to serve their needs
+
+Software Training Program
+Upskill your team’s knowledge, and set them up for long-term success with our customized course build
+
+Focusing on The Needs and Goals of Our Clients’ Businesses
+We are convinced that a professionally developed single-page web app can offer impressive and secure web experience. By designing and developing interactive Applications, we ensure responsiveness and cross-browser compatibility, as well as live up to users’ high expectations in agility and performance.
+
+A database that carefully shelves your data in a secure and reliable environment and can be optionally integrated with other data sources to avoid manual input. A web application that allows you to use this data in a fast and convenient way (with basic Create, Read, Update and Delete operations, as well as with rich search, filter, and reporting functionality). A mobile application (optionally) that allows you to access the database and leverage its features wherever you are, reflecting the demands of today’s on-the-go life.
+
+
+Website or Web Application
+Software Training
+E-commerce Websites
+Software Development
+
+Review
+
+Daniyal
+Course Name : AI Engineering
+Learned a lot from Brother Ajaz. He provided very detailed answers to any questions we had.
+On Thursday 27th, November 2025 02:31:08 AM
+
+Akbar Ali
+Course Name : AI Engineering
+Thank you very much Ajaz for organizing this class. It was an excellent presentation that enlightened us with your in-depth knowledge and experience on AI. Please continue the good work.
+On Saturday 18th, October 2025 11:25:04 PM
+
+Samah
+Course Name : AI Engineering
+Excellent course and Ajaz is very knowledgeable and supportive.
+On Saturday 18th, October 2025 09:39:37 PM
+
+Arshad Mahmood
+Course Name : AI Engineering
+This AI class provided a valuable learning experience. The lessons were clear and engaging. Thanks to our instructor (Ajaz) who explained complex ideas clearly and supported them with practical exercises. I'd definitely recommend it to anyone eager to learn about artificial intelligence.
+On Sunday 5th, October 2025 05:30:50 PM
+
+Shabbir
+Course Name : AI Engineering
+The class was extremely detailed and informative. It’s perfect for both beginners and experienced IT professionals. Ajaz took the time to explain everything with great clarity and care.
+On Sunday 5th, October 2025 05:26:37 PM
+
+Johar
+Course Name : AI Engineering
+Very detailed and informative class. Ajaz explained everything in detail and thoughtfully
+On Sunday 5th, October 2025 03:52:22 PM
+
+Khalid Abudiab
+Course Name : AI Engineering
+f you’re looking to level up your AI skills, this class is a game-changer. Expert instruction, hands-on learning, and inspiring insights — a course you simply shouldn’t miss!
+
+
+Courses offered
+Applied AI Agents
+ADAMS-AI's Impact on Labor Market
+ADAMS-Prompt Engineering
+AI Engineering Bootcamp
+AI Engineering Bootcamp & SQL Module
+AI Engineering Bootcamp & ML Math Module
+AI Engineering Bootcamp & SQL + ML Math Module
+Power BI
+SQL Expert
+Oracle APEX Cloud Developer Specialist
+Analyze Data and Automate Tasks with Python
+Oracle PL/SQL
+Big Data
+Django
+
+Contact us
+General Inquiry : info@razsystems.com
+Training Inquiry : training@razsystems.com
