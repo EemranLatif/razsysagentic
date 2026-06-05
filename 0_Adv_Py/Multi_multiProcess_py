@@ -1,0 +1,27 @@
+### CMD Command: wmic cpu get NumberOfCores,NumberOfLogicalProcessors
+### Mac: sysctl -n hw.physicalcpu
+
+from multiprocessing import Pool
+
+def heavy_computation(args):
+    task_name, n = args
+    print(f"Started {task_name}")
+    # Simulate CPU-heavy work with different ranges per task
+    total = sum(i * i for i in range(n))
+    print(f"Done {task_name}")
+    return f"{task_name}: {total}"
+
+if __name__ == "__main__":
+    tasks = [
+        ("Task 1", 50000),
+        ("Task 2", 100000),
+        ("Task 3", 800),
+    ]
+
+    # Spawn a separate process for each task
+    with Pool(processes=3) as pool:
+        results = pool.map(heavy_computation, tasks)
+
+    print("All done:")
+    for r in results:
+        print(r)
