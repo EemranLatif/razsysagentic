@@ -18,4 +18,11 @@ async def main():
 
 
 if __name__ == "__main__":
+    asyncio.run(fetch_from_db("Orders", 10) )
+    print("Orders done")
+
+"""
+if __name__ == "__main__":
     asyncio.run(main())
+    print("All done")
+"""
