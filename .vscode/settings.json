@@ -1,0 +1,18 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.analysis.indexing": false,
+  "python.analysis.packageIndexDepth": 1,
+  "jupyter.kernels.excludePythonEnvironments": [
+    "C:\\Users\\Admin\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\\python.exe"
+  ],
+  "jupyter.interruptTimeout": 10000,
+  "files.watcherExclude": {
+    "**/.venv/**": true,
+    "**/__pycache__/**": true
+  },
+  "search.exclude": {
+    "**/.venv": true
+  },
+  "notebook.output.scrolling": true,
+  "notebook.output.textLineLimit": 30
+}
