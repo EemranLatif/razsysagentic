@@ -1,10 +1,25 @@
 """
-HR Employee Handbook — RAG Chatbot
-Run:  python hr_rag_app.py
+HR Employee Handbook — RAG Chatbot (v2)
+Run:  python hr_rag_app_v2.py
 Deps: pip install gradio openai supabase python-dotenv
+
+What changed from v1
+---------------------
+- MATCH_THRESH lowered from 0.7 to 0.3. Real similarity scores for this handbook
+  cluster around 0.5-0.6, so a 0.7 floor was filtering out every chunk and
+  retrieve_context() always returned empty -> "no relevant sections" -> the
+  model had nothing to answer from.
+- MATCH_COUNT widened to 15 candidates, then reranked and trimmed to TOP_K (5)
+  using a keyword-overlap boost (same technique used in the notebook), so the
+  wider net doesn't just let in noise.
+- Point this app at an hr_documents table populated by the heading-aware
+  chunking notebook (v2) for best results — the threshold fix alone stops the
+  "no response" problem, but better chunks make the retrieved sections sharper.
 """
 
 import os
+import re
+
 import gradio as gr
 from dotenv import load_dotenv
 from supabase import create_client
@@ -20,27 +35,71 @@ OPENAI_API_KEY   = os.getenv("OPENAI_API_KEY")
 EMBED_MODEL  = "text-embedding-3-small"
 CHAT_MODEL   = "gpt-4o-mini"
 TABLE_RPC    = "match_hr_documents"
-MATCH_THRESH = 0.7
-MATCH_COUNT  = 5
+
+MATCH_THRESH = 0.3     # was 0.7 — real scores cluster around 0.5-0.6
+MATCH_COUNT  = 15      # wide candidate pool, reranked below
+TOP_K        = 5       # how many chunks we actually keep/show after rerank
+KEYWORD_WEIGHT = 0.05  # bonus added per literal query-word match in a chunk
 
 # ── Clients ───────────────────────────────────────────────────────────────────
 supabase = create_client(SUPABASE_URL, SUPABASE_API_KEY)
 openai   = OpenAI(api_key=OPENAI_API_KEY)
+
+WORD_RE = re.compile(r"[a-z]+")
 
 # ── RAG helpers ───────────────────────────────────────────────────────────────
 def get_embedding(text: str) -> list:
     response = openai.embeddings.create(model=EMBED_MODEL, input=text)
     return response.data[0].embedding
 
+# ── Worked example: why the keyword rerank matters ───────────────────────────
+#
+# Query: "what is termination policy?"
+#
+# Chunk A: "...TERMINATION OF EMPLOYMENT...notices of termination
+#           will be made per policy..."
+#   similarity    = 0.556
+#   shared words  = {"termination", "policy"}
+#   keyword_score = 2
+#   combined_score = 0.556 + (0.05 * 2) = 0.556 + 0.10 = 0.656
+#
+# Chunk B: "Students violating this policy will be disciplined..."
+#   similarity    = 0.597
+#   shared words  = {"policy"}
+#   keyword_score = 1
+#   combined_score = 0.597 + (0.05 * 1) = 0.597 + 0.05 = 0.647
+#
+# Before rerank: Chunk B ranks #1 (0.597 > 0.556) — wrong chunk, about
+#                student discipline, not employee termination.
+#
+# After rerank:  Chunk A ranks #1 (0.656 > 0.647) — the keyword bonus
+#                flips the order because Chunk A actually contains the
+#                word "termination", not just "policy".
+# ───────────────────────────────────────────────────────────────────────────
 
 def retrieve_context(query: str) -> list:
+    """Retrieve a wide candidate pool by vector similarity, then rerank by
+    adding a small bonus for literal word overlap with the query. Returns
+    the top TOP_K chunks after reranking."""
     query_embedding = get_embedding(query)
     result = supabase.rpc(TABLE_RPC, {
         "query_embedding": query_embedding,
         "match_threshold":  MATCH_THRESH,
         "match_count":      MATCH_COUNT,
     }).execute()
-    return result.data or []
+    candidates = result.data or []
+
+    if not candidates:
+        return []
+
+    query_terms = set(WORD_RE.findall(query.lower()))
+    for c in candidates:
+        text_terms = set(WORD_RE.findall(c["content"].lower()))
+        c["keyword_score"]  = len(query_terms & text_terms)
+        c["combined_score"] = c["similarity"] + KEYWORD_WEIGHT * c["keyword_score"]
+
+    candidates.sort(key=lambda c: c["combined_score"], reverse=True)
+    return candidates[:TOP_K]
 
 
 def build_context_block(chunks: list) -> str:
@@ -63,7 +122,7 @@ def answer_question(query: str, history: list) -> tuple:
     if not query.strip():
         return "", history, ""
 
-    # 1. Retrieve relevant chunks
+    # 1. Retrieve relevant chunks (wide pool -> keyword rerank -> top_k)
     chunks  = retrieve_context(query)
     context = build_context_block(chunks)
 
@@ -101,7 +160,7 @@ def answer_question(query: str, history: list) -> tuple:
             snippet = c["content"][:350] + ("…" if len(c["content"]) > 350 else "")
             ctx_md += (
                 f"**Page {c['page_number']} · chunk {c['chunk_index']} "
-                f"· similarity {c['similarity']:.2f}**\n\n"
+                f"· similarity {c['similarity']:.2f} · keyword hits {c['keyword_score']}**\n\n"
                 f"> {snippet}\n\n---\n\n"
             )
     else:
@@ -148,6 +207,7 @@ with gr.Blocks(title="HR Handbook Assistant") as demo:
             "sick leave policy?",
             "How many days notice is needed to get on the board meeting agenda?",
             "Can I stop dues deductions to a professional organization?",
+            "what is termination policy?",
         ],
         inputs=question_box,
         label="Example questions",
