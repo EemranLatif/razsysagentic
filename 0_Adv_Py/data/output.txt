@@ -1,2 +1,3 @@
 Hello World
 New line added
+New line This is writing to file in append mode

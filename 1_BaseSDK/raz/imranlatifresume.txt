@@ -1,0 +1,29 @@
+Imran Latif - Resume Summary
+
+Imran Latif is a senior full stack .NET developer and IT professional with extensive experience building, integrating, and maintaining enterprise web applications. His background includes ASP.NET Core, ASP.NET MVC, ASP.NET Web Forms, C#, WCF, Angular, Bootstrap, jQuery, JavaScript, and Agile methodologies.
+
+He has hands-on experience integrating ASP.NET MVC applications with Salesforce CRM and designing Salesforce-based PDF document generation solutions using Conga and DocuSign. His resume highlights strong front-end and back-end development skills, plus experience leading teams, training others, managing multiple tasks, and delivering projects on target.
+
+Current / Recent Role
+- Senior Applications Developer at Randstad Technologies supporting the Federal Reserve Board, Washington D.C. Metro Area, from June 2018 to present.
+
+Professional Experience Highlights
+- Senior .NET Full Stack Developer at The Kenific Group.
+- Senior Programmer Analyst at Spectraforce Technologies.
+- Senior .NET Developer / Senior Programmer Analyst roles at Sagent Partners and GEICO.
+- Senior .NET Consultant at Jobspring Partners.
+- Senior .NET Developer at Macrosoft.
+- Programmer Analyst / Team Lead at Affiliated Computer Services.
+- Earlier software engineering roles at mindjet and MicroTech Industries.
+
+Education
+- Master's degree in Computer Science from Maharishi University of Management, 2006-2009.
+- Bachelor of Science in Computer Science from University of Engineering and Technology, Lahore/Garrison Campus, 2001-2004.
+
+Top Skills
+- WCF
+- C#
+- Agile Methodologies
+
+Overall Profile
+Imran's resume presents him as an experienced enterprise application developer with a strong Microsoft .NET background, Salesforce integration experience, web UI development skills, and a long career history across consulting, federal, insurance, and technology organizations.
