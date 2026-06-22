@@ -13,9 +13,18 @@ from openai import OpenAI
 # ── Config ────────────────────────────────────────────────────────────────────
 load_dotenv(override=True)
 
-SUPABASE_URL     = "https://ssrxdvbnjfruzikvages.supabase.co"
+          
+SUPABASE_URL     = os.getenv("supabase_project_url")
+print("SUPABASE_URL:", SUPABASE_URL)
+
+
+
+
 SUPABASE_API_KEY = os.getenv("SUBABASE_API_KEY")
 OPENAI_API_KEY   = os.getenv("OPENAI_API_KEY")
+
+print("URL =", repr(SUPABASE_URL))
+print("KEY =", SUPABASE_API_KEY)
 
 EMBED_MODEL  = "text-embedding-3-small"
 CHAT_MODEL   = "gpt-4o-mini"
