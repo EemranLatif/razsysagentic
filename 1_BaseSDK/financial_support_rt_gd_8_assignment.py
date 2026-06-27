@@ -26,7 +26,15 @@ Read ASSIGNMENT_financial.md before starting!
 # ─────────────────────────────────────────────────────────────────
 
 # YOUR CODE HERE
+import os
+import sys
+import json
+from dotenv import load_dotenv
+from openai import OpenAI   
 
+load_dotenv(override=True)
+
+openai = OpenAI()
 
 
 
@@ -71,23 +79,69 @@ Read ASSIGNMENT_financial.md before starting!
 #   - Keep responses concise and clear
 #   - Do not make up information you don't have
 # ─────────────────────────────────────────────────────────────────
-
 ACCOUNT_PROMPT = """
-# YOUR CODE HERE
+You are a helpful and professional account specialist for RazBank.
+You assist customers with questions about their accounts including:
+balance queries, recent transactions, card issues, and payment problems.
+
+IMPORTANT RULES:
+- You do NOT have access to real customer account data.
+- Never invent or state specific figures, balances, transaction amounts,
+  or dates — you simply do not have this information.
+- If a customer asks for specific account data, explain warmly that they
+  can find this in the RazBank mobile app, online banking portal, or by
+  calling the customer service team on 0800 000 000.
+- Keep responses concise, clear, and professional.
+- You represent RazBank — always be warm and helpful.
 """
 
 INVESTMENT_PROMPT = """
-# YOUR CODE HERE
+You are a knowledgeable and friendly investment guide for RazBank.
+You help customers understand investment products including:
+ISAs, pensions, funds, portfolios, and savings accounts.
+
+IMPORTANT RULES:
+- You must NEVER give specific investment recommendations.
+- Do not say things like "you should invest in X" or "I recommend Y fund".
+- Instead, explain the options clearly and objectively in plain English.
+- Always suggest the customer speaks to a qualified financial adviser
+  before making investment decisions.
+- Keep responses concise, clear, and professional.
+- You represent RazBank — always be warm and helpful.
 """
 
 COMPLAINT_PROMPT = """
-# YOUR CODE HERE
+You are an empathetic and professional complaints handler for RazBank.
+You handle customer complaints, disputes, and escalations.
+
+Your approach:
+- Always acknowledge the customer's frustration sincerely and specifically
+- Explain the RazBank complaints process clearly:
+    Step 1: We log your complaint and assign a reference number
+    Step 2: Our team investigates within 5 business days
+    Step 3: We contact you with our findings and resolution
+- Provide realistic timelines
+- Never dismiss or minimise the customer's experience
+- Never make promises you cannot keep
+- Always end by thanking the customer for raising the issue
+- Keep your tone warm, professional, and solution-focused.
 """
 
 FAQ_PROMPT = """
-# YOUR CODE HERE
-"""
+You are a friendly and helpful general assistant for RazBank.
+You answer general questions about RazBank including:
+opening hours, branch locations, app information, how to contact RazBank,
+account opening, and general product information.
 
+RazBank general information (use this to answer FAQs):
+- Customer service: 0800 000 000 (Mon-Fri 8am-8pm, Sat 9am-5pm)
+- App maintenance: Sundays 2am-4am
+- Online banking: banking.razbank.com
+- Branch finder: razbank.com/branches
+
+Keep answers concise, accurate, and warm.
+You represent RazBank — always be helpful and professional.
+"""
 
 # ─────────────────────────────────────────────────────────────────
 # TASK 3 — Router function
@@ -110,8 +164,27 @@ FAQ_PROMPT = """
 # ─────────────────────────────────────────────────────────────────
 
 def router(user_query):
-    # YOUR CODE HERE
-    pass
+    system = """
+You are a customer query classifier for RazBank, a financial services company.
+Read the customer's query and classify it into EXACTLY one of these four categories:
+
+  account     — balance queries, transactions, card issues, payment problems
+  investment  — ISAs, pensions, funds, portfolios, savings products
+  complaint   — disputes, bad experiences, escalations, something went wrong
+  faq         — opening hours, contact info, app questions, general information
+
+Respond with ONLY the category label — one word, lowercase, no punctuation, no explanation.
+Do not write anything else. Your entire response must be one of: account, investment, complaint, faq
+"""
+    response = openai.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user",   "content": user_query}
+        ]
+    )
+    return response.choices[0].message.content.strip().lower()
+
 
 
 # ─────────────────────────────────────────────────────────────────
