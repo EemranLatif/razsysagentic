@@ -1,5 +1,5 @@
-requests
-python-dotenv
-gradio
-pypdf
-openai
+gradio==5.34.2
+openai==1.95.1
+pypdf==5.7.0
+python-dotenv==1.1.1
+requests==2.32.4
