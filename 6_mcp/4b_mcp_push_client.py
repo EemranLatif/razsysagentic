@@ -14,7 +14,8 @@ async def main():
     PUSHOVER_APP_TOKEN = os.getenv("PUSHOVER_TOKEN")
     push_params = {
         "command": "uv",
-        "args": ["run", "d:/raz_training/6_mcp/push_server.py"],
+        "args": ["run", "D:/git/agentic/6_mcp/4a_mcp_push_server.py"],
+        "client_session_timeout_seconds": 60,
         "env": {
             "PUSHOVER_USER": PUSHOVER_USER_KEY,
             "PUSHOVER_TOKEN": PUSHOVER_APP_TOKEN
