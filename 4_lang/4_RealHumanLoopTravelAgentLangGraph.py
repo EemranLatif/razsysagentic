@@ -251,7 +251,7 @@ def review(state: TravelState):
 # NODE 4 — HUMAN APPROVAL
 # ─────────────────────────────────────────────────────
 
-def human_approval(state: TravelState):
+def human_approval1(state: TravelState):
 
     """
     Human decides approval
@@ -280,6 +280,13 @@ def human_approval(state: TravelState):
             "approved": False
         }
     )
+
+def human_approval(state: TravelState) -> dict:
+    answer = input("\nApprove trip? (y/n): ").lower()
+    return {"approved": answer == "y"}
+
+def route_after_approval(state: TravelState) -> str:
+    return "notify" if state["approved"] else END
 
 
 # ─────────────────────────────────────────────────────
@@ -321,6 +328,11 @@ graph.set_entry_point("perceive")
 graph.add_edge("perceive", "search")
 graph.add_edge("search", "review")
 graph.add_edge("review", "human_approval")
+graph.add_conditional_edges(
+    "human_approval",
+    route_after_approval,
+    {"notify": "notify", END: END},
+)
 graph.add_edge("notify", END)
 
 # Compile graph

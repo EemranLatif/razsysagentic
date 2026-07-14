@@ -1,32 +1,17 @@
 """
-<h1>RAZ Systems </h1>
+RAZ Systems — Agentic AI Engineering Curriculum
+LangGraph Assignment SOLUTION: From Simulation to Production
+================================================================
 
+Fully worked solution to assignment.py — runnable end to end with:
+    python solution.py
 
+Built on top of v3_toolnode.py, extended with a third tool
+(search_activities) that flows through ToolNode exactly the same way
+search_flights / search_hotels already did.
 
-VERSION 3 — ToolNode + MAX_ATTEMPTS (Proper Retry Logic)
-=========================================================
-
-The key insight:
-    ToolNode handles tool EXECUTION automatically.
-    MAX_ATTEMPTS is tracked in STATE — not inside the LLM.
-
-Graph flow:
-    START
-      ↓
-    search  ◄─────────────────────────────────────────────┐
-      ↓                                                    │
-    tools  (ToolNode — auto executes search_flights        │
-      ↓              and search_hotels)                    │
-    observe  (LLM reads results, extracts total_cost)      │
-      ↓                                                    │
-    decide ──→ within budget?           → notify → END     │
-           ──→ over budget, attempts < MAX ────────────────┘
-           ──→ over budget, attempts >= MAX → END
-
-Why this works:
-- ToolNode still handles tool execution (no manual loop)
-- attempts lives in State — always visible, always real
-- decide is plain Python — MAX_ATTEMPTS check is real code, not a prompt
+See explanation.md for the full reasoning behind every answer below —
+this file focuses on working code; the .md file focuses on WHY it works.
 """
 
 import os
@@ -87,6 +72,23 @@ def search_hotels(destination: str, checkin_date: str, checkout_date: str, prefe
     return "\n\n".join(results) or "No results found."
 
 
+# SOLUTION B1 — third tool, same pattern as the two above
+@tool
+def search_activities(destination: str, preferences: str = "") -> str:
+    """Search for popular tourist activities and their typical costs in a destination."""
+    query = f"top tourist activities and prices in {destination} {preferences}"
+    response = requests.post(
+        "https://google.serper.dev/search",
+        json={"q": query},
+        headers={"X-API-KEY": SERPER_API_KEY, "Content-Type": "application/json"}
+    )
+    results = [
+        f"Title: {item.get('title')}\nSnippet: {item.get('snippet')}"
+        for item in response.json().get("organic", [])[:3]
+    ]
+    return "\n\n".join(results) or "No results found."
+
+
 def send_pushover(message: str):
     """Send a Pushover push notification — called directly, not as a tool."""
     requests.post(
@@ -100,7 +102,10 @@ def send_pushover(message: str):
     )
 
 
-tools          = [search_flights, search_hotels]  # only search tools go to ToolNode
+# SOLUTION B1 (continued) — the ONE place the tools list needs updating.
+# llm_with_tools and ToolNode(tools) below both reference this same list,
+# so they pick up search_activities automatically — see explanation.md B4.
+tools          = [search_flights, search_hotels, search_activities]
 llm_with_tools = ChatOpenAI(model="gpt-4o-mini", temperature=0).bind_tools(tools)
 plain_llm      = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
@@ -131,16 +136,19 @@ def search(state: State):
 
     print(f"\n🔍 SEARCH — Attempt {attempt}/{MAX_ATTEMPTS}")
 
+    # SOLUTION B2 — all three tools instructed explicitly
     prompt = SystemMessage(content=(
         f"You are a travel search agent. Attempt {attempt} of {MAX_ATTEMPTS}.\n"
-        f"Call BOTH tools now — one call for flights, one for hotels:\n"
+        f"Call ALL THREE tools now — one for flights, one for hotels, one for activities:\n"
         f"  Flights: destination={state['destination']}, "
         f"departure_date={state['departure']}, return_date={state['return_date']}"
         f"{', preferences=' + cheaper if cheaper else ''}\n"
         f"  Hotels:  destination={state['destination']}, "
         f"checkin_date={state['departure']}, checkout_date={state['return_date']}"
         f"{', preferences=' + cheaper if cheaper else ''}\n"
-        f"Call both tools now. No text."
+        f"  Activities: destination={state['destination']}"
+        f"{', preferences=' + cheaper if cheaper else ''}\n"
+        f"Call all three tools now. No text."
     ))
 
     response = llm_with_tools.invoke([prompt])
@@ -170,12 +178,16 @@ def search(state: State):
 def observe(state: State):
     print("\n📊 OBSERVE — reading results")
 
+    # SOLUTION B3 — added ACTIVITIES_COST, and TOTAL_COST is now explicitly
+    # flight + hotel + activities combined, so decide() needs ZERO changes.
     extract_prompt = HumanMessage(content=(
-        f"Read the flight and hotel search results above.\n"
+        f"Read the flight, hotel, and activity search results above.\n"
         f"Reply ONLY in this exact format — no extra text:\n\n"
-        f"TOTAL_COST: <single number in USD, flight + hotel combined>\n"
+        f"TOTAL_COST: <single number in USD, flight + hotel + activities combined>\n"
+        f"ACTIVITIES_COST: <single number in USD, activities only>\n"
         f"ITINERARY:\n"
-        f"<day-by-day plan with real dates starting {state['departure']}>"
+        f"<day-by-day plan with real dates starting {state['departure']}, "
+        f"including 1-2 activities per day>"
     ))
 
     response   = plain_llm.invoke(state["messages"] + [extract_prompt])
@@ -184,10 +196,15 @@ def observe(state: State):
     match      = re.search(r"TOTAL_COST:\s*\$?([\d,]+)", text)
     total_cost = float(match.group(1).replace(",", "")) if match else 9999.0
 
+    # SOLUTION B3 (continued) — extracted for visibility/logging only;
+    # decide() never needs to read this since total_cost already includes it.
+    act_match      = re.search(r"ACTIVITIES_COST:\s*\$?([\d,]+)", text)
+    activities_cost = float(act_match.group(1).replace(",", "")) if act_match else 0.0
+
     itin_match = re.search(r"ITINERARY:\s*(.+)", text, re.DOTALL)
     itinerary  = itin_match.group(1).strip() if itin_match else text
 
-    print(f"  💰 Total: ${total_cost}  |  Budget: ${state['budget']}")
+    print(f"  💰 Total: ${total_cost}  (activities: ${activities_cost})  |  Budget: ${state['budget']}")
 
     return {
         "total_cost": total_cost,
@@ -198,6 +215,7 @@ def observe(state: State):
 # ─────────────────────────────────────────────────────
 # NODE 4 — DECIDE
 # MAX_ATTEMPTS enforced here in real Python — not in a prompt
+# Unchanged from v3_toolnode.py — see explanation.md B3 for why.
 # ─────────────────────────────────────────────────────
 
 def decide(state: State):
@@ -237,6 +255,13 @@ def notify(state: State):
 graph = StateGraph(State)
 
 graph.add_node("search",  search)
+
+# SOLUTION B4 — NO new graph.add_node(...) call needed. ToolNode(tools) is
+# ONE node that dispatches internally to whichever tool the LLM's tool-call
+# names — it looks up the function by name inside the `tools` list. Adding
+# search_activities to that list gives this SAME "tools" node a third
+# function it can call; it does not create a third node in the graph.
+# Full reasoning in explanation.md, section B4.
 graph.add_node("tools",   ToolNode(tools))  # ← auto-executes tool calls
 graph.add_node("observe", observe)
 graph.add_node("notify",  notify)
@@ -255,7 +280,7 @@ app = graph.compile()
 # ─────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    print(f"🚀 V3 — ToolNode + MAX_ATTEMPTS ({MAX_ATTEMPTS})")
+    print(f"🚀 SOLUTION — ToolNode + 3 tools + MAX_ATTEMPTS ({MAX_ATTEMPTS})")
 
     result = app.invoke({
         "messages":    [],

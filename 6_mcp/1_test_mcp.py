@@ -1,6 +1,25 @@
 # 
 # <h1>RAZ Systems </h1>
 # 
+# mcp-server-fetch is an official Anthropic reference MCP server (from the
+# modelcontextprotocol/servers repo), released as one of the original example
+# servers alongside MCP's launch in Nov 2024.
+# Its job: given a URL, it fetches the page over HTTP and converts the raw HTML
+# into clean, LLM-friendly Markdown -- stripping out scripts, nav bars, ads,
+# and other clutter so the model reads useful text instead of markup noise.
+# It exposes this as a single MCP tool (commonly "fetch") that any MCP client
+# (including a LangGraph/LangChain agent) can call just like any other tool,
+# passing in a URL and getting back the page content as a string.
+# It's meant as a teaching/reference implementation to demonstrate MCP, not a
+# hardened production web scraper -- fine for coursework and demos, but treat
+# it accordingly if you ever point it at untrusted or sensitive workloads.
+#
+# `mcp-server-fetch` runs locally, as a separate subprocess on the same machine as this client — not on any remote/Anthropic server.
+# The client talks to it over stdio (its stdin/stdout), sending and receiving MCP protocol messages as JSON-RPC.
+# "uvx mcp-server-fetch" downloads the package from PyPI into a temporary uv-managed environment (if not already cached) and runs it immediately — no separate pip install step needed.
+# The subprocess is spawned when the MCP client session starts and terminated when it ends; it isn't a persistent background service.
+# Note: the very first run on a machine needs internet access to fetch the package from PyPI; later runs use uv's local cache and start almost instantly.
+#
 # the program can wait for slow operations (network calls,
 # subprocesses, APIs) WITHOUT freezing the entire application.
 import asyncio
@@ -96,8 +115,9 @@ async def main():
     serper_params = {
         "command": "uvx",
         "args": ["serper-mcp-server"],
+        "client_session_timeout_seconds": 60,
         "env": {
-            "SERPER_API_KEY": "a7648495593312f27771ecb236dea9a88be6c713"
+            "SERPER_API_KEY": "<<SERPER_API_KEY>>"
         }
     }
 
