@@ -1,4 +1,34 @@
 #!/usr/bin/env python
+"""
+CREW EXECUTION MODES
+=====================
+
+RUN (crewai run)
+-----------------
+Standard one-off execution — kicks off the crew locally from scratch, running
+every agent/task in sequence (or hierarchy) with the inputs you've provided.
+This is the default command you'll use during normal development and debugging.
+
+TEST (crewai test)
+-------------------
+Runs the crew multiple times (default: 3 iterations) against a specified LLM
+and evaluates the results for consistency. Use this to check output quality
+and stability across repeated runs, not just whether the crew runs without errors.
+
+RUN WITH TRIGGER (crewai triggers run — CrewAI AMP)
+-----------------------------------------------------
+Connects a deployed crew to real-time events (new emails, CRM updates, Slack
+messages, etc.) so it launches automatically when those events fire, instead
+of being kicked off manually. Note: plain `crewai run` does NOT simulate
+trigger calls — use `crewai triggers run` to test trigger-driven behavior locally.
+
+REPLAY (crewai replay -t <task_id>)
+--------------------------------------
+Re-runs the crew starting from a specific task ID, reusing the cached outputs
+of every task before it. Use this to avoid re-executing expensive earlier
+steps while iterating on a later task in a multi-task pipeline.
+"""
+
 import sys
 import warnings
 
